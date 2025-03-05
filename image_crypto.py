@@ -46,20 +46,15 @@ def decrypt_image(input_path, output_path, key):
     img_bytes = img_array.tobytes()
 
     cipher = AES.new(get_key(key), AES.MODE_ECB)
-    decrypted_bytes = cipher.decrypt(img_bytes)
-
-    # Remove padding
-    pad_length = decrypted_bytes[-1]
-    if pad_length < 16:
-        decrypted_bytes = decrypted_bytes[:-pad_length]
+    decrypted_bytes = cipher.decrypt(img_bytes).rstrip(b"\0")
 
     try:
         decrypted_array = np.frombuffer(decrypted_bytes, dtype=np.uint8).reshape(img_array.shape)
         decrypted_img = Image.fromarray(decrypted_array)
         decrypted_img.save(output_path)
-        return output_path
+        return output_path  # Return path of saved decrypted image
     except ValueError:
-        messagebox.showerror("Error", "Decryption failed due to incorrect key or corrupted image.")
+        messagebox.showerror("Error", "Decryption failed. Incorrect key?")
         return None
 
 # GUI functions
